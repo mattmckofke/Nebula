@@ -17,41 +17,49 @@ class Library:
         
     def add_book(self, book):
         self.books.append(book)
-        print("Book " + book.title + " has been added")
+        print(f"{book.title} has been added to the library")
         
     def remove_book(self, book):
         self.books.remove(book)
-        print("Book " + book.title + " has been removed")
+        print(f"{book.title} has been removed from the library")
         
     def borrow_book(self, member, book):
         if book.status == "available":
             book.status = "borrowed"
             member.borrowed_books.append(book)
-            print("Member " + member.name + " has borrowed " + book.title)
+            print(f"{member.name} has borrowed {book.title} from the library")
         else:
-            print("Book is not available")
+            print("Book is not available currently")
             
     def return_book(self, member, book):
         if book.status == "borrowed":
             book.status = "available"
             member.borrowed_books.remove(book)
-            print("Member " + member.name + " has returned " + book.title)
+            print(f"{member.name} has returned {book.title} to the library")
         else:
-            print("Book is not borrowed")
+            print("Book is not borrowed currently")
             
     def display_books(self):
         for book in self.books:
-            print(book.title + " by " + book.author + " is " + book.status)
+            print(f"{book.title} by {book.author} is {book.status}")
             
     def add_member(self, member):
-        self.members.append(member)
+        if member not in self.members:
+            self.members.append(member)
+            print(f"{member.name} has been added to the member database")
+        else:
+            print(f"Successfully added {member.name} to the member database")
         
     def remove_member(self, member):
-        self.members.remove(member)
+        if member in self.members:
+            self.members.remove(member)
+            print(f"Successfully removed {member.name} from the member database")
         
     def display_members(self):
         for member in self.members:
-            print(member.name + " has borrowed " + str(len(member.borrowed_books)) + " books")
+            book_count = len(member.borrowed_books)
+            book_word = "book" if book_count == 1 else "books"
+            print(f"{member.name} currently has {book_count} {book_word} borrowed")
             
 def main():
     book1 = Book("Book1", "Author1", "available")
