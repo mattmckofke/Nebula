@@ -1,0 +1,10 @@
+{
+    "current_post_id": 1,
+    "posts": {
+        "1": {
+            "title": "Test",
+            "content": "test",
+            "post_id": 1
+        }
+    }
+}
