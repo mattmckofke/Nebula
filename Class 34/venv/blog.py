@@ -45,7 +45,7 @@ def initialize_db():
             content VARCHAR(200)
         );
     """)
-    cur.execute("INSERT INTO posts (title, content) VALUES ('Title3', 'My first DB post');")
+    cur.execute("INSERT INTO posts (title, content) VALUES ('seed title', 'seed content');")
     conn.commit()
     cur.close()
     conn.close()
@@ -147,7 +147,7 @@ def create_post():
 def get_post_by_id(id):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM posts WHERE post_id=%s", str(id))
+    cur.execute("SELECT * FROM posts WHERE post_id=%s", (id,))
     result = cur.fetchone()
     if not result:
         return not_found("No id found")
@@ -165,33 +165,60 @@ def get_post_by_id(id):
 def update_post(id):
     conn = get_db_connection()
     cur = conn.cursor()
-    if id not in db['posts']:
+    cur.execute("SELECT * FROM posts WHERE post_id=%s", (id,))
+    result = cur.fetchone()
+    if not result:
         return not_found("No id found")
     
     updated_post = request.json
     if 'title' in updated_post:
-        db['posts'].get(id)['title'] = updated_post['title']
+        cur.execute("UPDATE posts SET title=%s WHERE post_id=%s", (updated_post['title'], id))
     if 'content' in updated_post:
-        db['posts'].get(id)['content'] = updated_post['content']
+        cur.execute("UPDATE posts SET content=%s WHERE post_id=%s", (updated_post['content'], id))
     
-    save_db()
-    return success(db['posts'].get(id))
+    #save_db()
+    conn.commit()
+    cur.close()
+    conn.close()
+    return success(updated_post)
 # 5. DELETE a Post
 @app.route("/posts/<int:id>", methods=['DELETE'])
 def delete_posts(id):
-    if id not in db['posts']:
-        return not_found("No Id Found")
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM posts WHERE post_id=%s", (id,))
+    result = cur.fetchone()
+    if not result:
+        return not_found("No id found")
     
-    db['posts'].pop(id, None)
-    save_db()
+    cur.execute("DELETE FROM posts WHERE post_id=%s", (id,))
+    #reset_post_id_sequence()
+    #save_db()
+    conn.commit()
+    cur.close()
+    conn.close()
     return success('Post Deleted')
 
+#def reset_post_id_sequence():
+#    conn = get_db_connection()
+#    cur = conn.cursor()
+    
+#    cur.execute("""
+#                SELECT SETVAL(
+#                    pg_get_serial_sequence('posts', 'post_id'),
+#                    COALESCE(MAX(post_id), 0)
+#                ) FROM posts;
+#                """)
+#    conn.commit()
+#    cur.close()
+#    conn.close()
+
 # Extra Challenge - Data Persistence
-def save_db():
-    with open('db.json', 'w') as file:
-        json.dump(db, file, indent=4)
+#def save_db():
+#    with open('db.json', 'w') as file:
+#       json.dump(db, file, indent=4)
         
-#initialize_db()
+initialize_db()
 
 if __name__ == '__main__':
     app.run(debug=True)
