@@ -18,11 +18,9 @@ availability = []
 for book in soup.find_all("article", class_="product_pod"):
     titles.append(book.find("h3").find("a")["title"])
     price_element = book.find("p", class_="price_color")
-    if price_element and price_element.text:
-        prices.append(price_element.text.replace('Â', '').strip("£"))  # Remove the pound sign and non-breaking space
+    prices.append(price_element.text[2:])  # Remove the pound sign and non-breaking space
     availability_element = book.find("p", class_="instock availability")
-    if availability_element and availability_element.text:
-        availability.append(availability_element.text.strip())
+    availability.append(availability_element.text.strip())
 
 # Convert prices to floats
 prices = [float(price) for price in prices]
@@ -42,6 +40,6 @@ print(df.head())  # Display the first few rows of the DataFrame
 average_price = df["Price (£)"].mean()
 print(f"Average Price: £{average_price:.2f}")
 
-# Count books under £10
-cheap_books = df[df["Price (£)"] < 10]
-print(f"Number of books under £10: {len(cheap_books)}")
+# Count books under £15
+cheap_books = df[df["Price (£)"] < 15]
+print(f"Number of books under £15: {len(cheap_books)}")
